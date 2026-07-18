@@ -106,33 +106,33 @@ const Bookings = () => {
 
 
   return (
-    <div className="p-4 md:p-10 bg-[#f8fafc] min-h-screen font-sans text-slate-700">
+    <div className="p-0 font-sans text-slate-700">
 
       {/* HEADER */}
       <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-bold text-brand-lake tracking-tight font-serif">
             Quản lý Đặt phòng
           </h1>
-          <p className="text-slate-500 mt-1">Hiển thị {bookings.length} kết quả trên trang {currentPage}</p>
+          <p className="text-slate-500 text-sm mt-1">Hiển thị {bookings.length} kết quả trên trang {currentPage}</p>
         </div>
         <button
           onClick={handleReset}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm active:scale-95"
+          className="inline-flex items-center justify-center gap-2 px-4.5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:text-brand-gold hover:border-brand-gold/30 hover:shadow-sm transition-all duration-200 active:scale-95 cursor-pointer font-medium text-sm"
         >
-          <RotateCcw size={18} /> <span className="font-medium">Làm mới bộ lọc</span>
+          <RotateCcw size={16} /> <span>Làm mới bộ lọc</span>
         </button>
       </div>
 
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* FILTER BAR */}
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center gap-4">
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap items-center gap-4">
           <div className="flex-1 min-w-[280px] relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-gold transition-colors" size={18} />
             <input
               placeholder="Tìm tên khách, số phòng..."
-              className="w-full bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 rounded-xl pl-11 p-2.5 transition-all outline-none"
+              className="w-full bg-slate-50 border-none ring-1 ring-slate-200/80 focus:ring-2 focus:ring-brand-gold rounded-xl pl-11 pr-4 py-2.5 transition-all outline-none text-sm text-slate-700"
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
             />
@@ -140,9 +140,9 @@ const Bookings = () => {
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
               <select
-                className="appearance-none bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 rounded-xl pl-10 pr-8 py-2.5 outline-none text-sm"
+                className="appearance-none bg-slate-50 border-none ring-1 ring-slate-200/80 focus:ring-2 focus:ring-brand-gold rounded-xl pl-10 pr-9 py-2.5 outline-none text-sm text-slate-600 cursor-pointer"
                 value={filters.status}
                 onChange={e => setFilters({ ...filters, status: e.target.value })}
               >
@@ -153,18 +153,18 @@ const Bookings = () => {
               </select>
             </div>
 
-            <div className="flex items-center gap-2 bg-slate-50 ring-1 ring-slate-200 rounded-xl px-3 py-1">
-              <Calendar size={16} className="text-slate-400" />
+            <div className="flex items-center gap-2 bg-slate-50 ring-1 ring-slate-200/80 rounded-xl px-3.5 py-1">
+              <Calendar size={15} className="text-slate-400" />
               <input
                 type="date"
-                className="bg-transparent border-none focus:ring-0 text-sm p-1.5 outline-none"
+                className="bg-transparent border-none focus:ring-0 text-sm p-1.5 outline-none text-slate-600 cursor-pointer"
                 value={filters.check_in}
                 onChange={e => setFilters({ ...filters, check_in: e.target.value })}
               />
               <span className="text-slate-300">|</span>
               <input
                 type="date"
-                className="bg-transparent border-none focus:ring-0 text-sm p-1.5 outline-none"
+                className="bg-transparent border-none focus:ring-0 text-sm p-1.5 outline-none text-slate-600 cursor-pointer"
                 value={filters.check_out}
                 onChange={e => setFilters({ ...filters, check_out: e.target.value })}
               />

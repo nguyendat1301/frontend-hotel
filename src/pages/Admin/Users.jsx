@@ -114,38 +114,45 @@ const Users = () => {
     }
 
     return (
-        <div className="p-8 max-w-6xl mx-auto">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-slate-800">Quản Lý Tài Khoản</h1>
-                <button onClick={handleOpenAdd} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-                    <Plus size={20} /> Thêm mới
+        <div className="p-0 max-w-7xl mx-auto font-sans text-slate-700">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-brand-lake font-serif tracking-tight">Quản lý tài khoản</h1>
+                    <p className="text-slate-500 text-sm mt-1">Danh sách nhân sự quản trị hệ thống LakeSide</p>
+                </div>
+                <button
+                    onClick={handleOpenAdd}
+                    className="bg-brand-lake hover:bg-brand-lake-light text-brand-gold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-md shadow-brand-lake/10 active:scale-95 cursor-pointer font-semibold text-sm"
+                >
+                    <Plus size={18} /> Thêm tài khoản
                 </button>
             </div>
 
-            <div className="space-y-3 mb-8">
+            <div className="space-y-3.5 mb-8">
                 {users.map((u) => (
-                    <div key={u.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-shadow">
+                    <div key={u.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white border border-slate-100 rounded-2xl hover:shadow-md hover:border-brand-gold/30 transition-all duration-300 gap-4 group">
                         <div className="flex-1">
-                            <h3 className="font-bold text-slate-800">{u.user_name}</h3>
-                            <p className="text-sm text-slate-500">{u.email}</p>
+                            <h3 className="font-bold text-base text-brand-lake font-serif tracking-wide">{u.user_name}</h3>
+                            <p className="text-xs text-slate-400 mt-0.5">{u.email}</p>
                         </div>
 
-                        <div className="flex items-center gap-8 flex-1 justify-center">
-                            <span className="text-xs font-semibold px-3 py-1 bg-slate-100 rounded-full text-slate-600 uppercase">
+                        <div className="flex items-center gap-6 sm:flex-1 justify-start sm:justify-center">
+                            <span className="text-[10px] font-bold px-2.5 py-1 bg-slate-50 border border-slate-150 rounded-full text-slate-600 uppercase tracking-wider">
                                 {u.role_user}
                             </span>
                             <div className="flex items-center gap-2">
-                                <span className={`w-2 h-2 rounded-full ${u.status_user === 'ACTIVE' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-                                <span className="text-sm text-slate-600">{u.status_user === 'ACTIVE' ? 'Hoạt động' : 'Đã khóa'}</span>
+                                <span className={`w-2 h-2 rounded-full ${u.status_user === 'ACTIVE' ? 'bg-brand-pine' : 'bg-rose-500'}`}></span>
+                                <span className="text-sm font-semibold text-slate-600">
+                                    {u.status_user === 'ACTIVE' ? 'Hoạt động' : 'Đã khóa'}
+                                </span>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-1">
-                            <button onClick={() => handleResetPassword(u)} className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg"><KeyRound size={18} /></button>
-                            <button onClick={() => handleOpenEdit(u)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit size={18} /></button>
-                            <button onClick={() => handleDelete(u.id)} className="p-2 text-amber-500 hover:bg-amber-50 rounded-lg" title="Xóa mềm"><UserMinus size={18} /></button>
-                            <button onClick={() => handleDeleteTrue(u.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg" title="Xóa vĩnh viễn"><UserX size={18} /></button>
-
+                        <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity justify-end">
+                            <button onClick={() => handleResetPassword(u)} className="p-2 hover:bg-amber-50 hover:text-amber-600 text-slate-400 rounded-lg transition-colors cursor-pointer" title="Cấp mật khẩu mới"><KeyRound size={16} /></button>
+                            <button onClick={() => handleOpenEdit(u)} className="p-2 hover:bg-brand-gold/10 hover:text-brand-gold text-slate-400 rounded-lg transition-colors cursor-pointer" title="Sửa"><Edit size={16} /></button>
+                            <button onClick={() => handleDelete(u.id)} className="p-2 hover:bg-amber-50 hover:text-amber-500 text-slate-400 rounded-lg transition-colors cursor-pointer" title="Khóa/Xóa mềm"><UserMinus size={16} /></button>
+                            <button onClick={() => handleDeleteTrue(u.id)} className="p-2 hover:bg-red-50 hover:text-red-600 text-slate-400 rounded-lg transition-colors cursor-pointer" title="Xóa vĩnh viễn"><UserX size={16} /></button>
                         </div>
                     </div>
                 ))}
@@ -157,7 +164,6 @@ const Users = () => {
                 totalPages={pagination.totalPages}
                 onPageChange={fetchUsers}
             />
-            {/* MODAL THÊM/SỬA */}
 
             <UserModal
                 isOpen={isModalOpen}

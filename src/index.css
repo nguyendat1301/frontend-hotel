@@ -1,6 +1,18 @@
-
 @import "tailwindcss";
 
+@theme {
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Outfit", "Inter", sans-serif;
+  
+  --color-brand-lake: #0b253a;
+  --color-brand-lake-light: #163e5e;
+  --color-brand-pine: #114232;
+  --color-brand-pine-light: #1d5f49;
+  --color-brand-gold: #c29a5b;
+  --color-brand-gold-light: #e5c38c;
+  --color-brand-mist: #f3f6f9;
+}
+
 body {
-  @apply antialiased text-slate-800;
+  @apply antialiased bg-[#f3f6f9] text-slate-800 font-sans;
 }
