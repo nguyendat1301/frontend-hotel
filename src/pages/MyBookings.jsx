@@ -162,7 +162,7 @@ const MyBookings = () => {
                               Phòng {rm.room_number} <span className="text-[10px] font-normal text-slate-500">({rm.room_name})</span>
                             </span>
                             <span className="text-slate-600 font-medium">
-                              {rm.guest_count} khách • {Number(rm.subtotal).toLocaleString()}₫
+                              {Number(rm.subtotal).toLocaleString()}₫
                             </span>
                           </div>
                         ))}
