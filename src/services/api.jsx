@@ -24,8 +24,9 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       const publicPaths = ['/login', '/register', '/forgot-password'];
       const isPublicPath = publicPaths.some(path => window.location.pathname.startsWith(path));
+      const isProfileRequest = error.config?.url?.replace(/^\/api/, '').startsWith('/profile');
 
-      if (!isPublicPath) {
+      if (!isPublicPath && !isProfileRequest) {
         localStorage.removeItem('user');
         window.location.href = '/login';
       }

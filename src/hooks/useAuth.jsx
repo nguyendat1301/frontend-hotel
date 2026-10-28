@@ -1,37 +1,65 @@
-import { useState, createContext, useContext } from 'react';
+import { useState, createContext, useContext, useEffect } from 'react';
 import api from '../services/api';
+import Loading from '../pages/Loading';
 
 const AuthContext = createContext(null);
 
-// Đừng dùng 'export' ở đây
 const AuthProvider = ({ children }) => {
-  // Xóa token cũ nếu còn sót lại từ phiên bản trước
-  if (localStorage.getItem('token')) {
-    localStorage.removeItem('token');
-  }
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
 
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
-    try {
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch (e) {
-      return null;
-    }
-  });
+  useEffect(() => {
+    let isMounted = true;
 
+    const loadProfile = async () => {
+      try {
+        const response = await api.get('/profile');
+        const profile = response.data;
+        const authenticatedUser = {
+          ...profile,
+          role: profile.role_user || profile.role,
+        };
+
+        if (isMounted) {
+          setUser(authenticatedUser);
+        }
+      } catch (error) {
+        if (error.response?.status === 401) {
+          if (isMounted) {
+            localStorage.removeItem('user');
+            setUser(null);
+          }
+        } else if (isMounted) {
+          setAuthError('Không thể xác thực phiên đăng nhập. Vui lòng tải lại trang.');
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadProfile();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const login = async (credentials) => {
     const response = await api.post('/login', credentials);
-    const { user: userData } = response.data;
-    localStorage.setItem('user', JSON.stringify(userData));
+    const userData = {
+      ...response.data.user,
+      role: response.data.user.role_user || response.data.user.role,
+    };
     setUser(userData);
     return response.data;
   };
 
   const googleLogin = async (googleData) => {
     const response = await api.post('/google-login', googleData);
-    const { user: userData } = response.data;
-    localStorage.setItem('user', JSON.stringify(userData));
+    const userData = {
+      ...response.data.user,
+      role: response.data.user.role_user || response.data.user.role,
+    };
     setUser(userData);
     return response.data;
   };
@@ -44,6 +72,8 @@ const AuthProvider = ({ children }) => {
     }
     localStorage.removeItem('user');
     setUser(null);
+    setAuthError('');
+    setIsLoading(false);
   };
 
   const register = async (data) => {
@@ -52,19 +82,23 @@ const AuthProvider = ({ children }) => {
 
   const updateUserData = (newData) => {
     const updatedUser = { ...user, ...newData };
-    localStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, googleLogin, logout, register, updateUserData }}>
-      {children}
+    <AuthContext.Provider value={{ user, isLoading, login, googleLogin, logout, register, updateUserData }}>
+      {isLoading ? <Loading /> : authError ? (
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-slate-700" role="alert">
+          <p>{authError}</p>
+          <button className="text-blue-600 underline" onClick={() => window.location.reload()}>
+            Tải lại trang
+          </button>
+        </div>
+      ) : children}
     </AuthContext.Provider>
   );
 };
 
-// Đừng dùng 'export' ở đây
 const useAuth = () => useContext(AuthContext);
 
-// Export tập trung ở cuối file
 export { AuthProvider, useAuth };
