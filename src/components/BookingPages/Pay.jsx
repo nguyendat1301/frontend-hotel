@@ -12,8 +12,8 @@ const PaymentModal = ({
 }) => {
     if (!bookingSummary) return null;
 
-    const rooms = selectedRooms && selectedRooms.length > 0 
-        ? selectedRooms 
+    const rooms = selectedRooms && selectedRooms.length > 0
+        ? selectedRooms
         : (selectedRoom ? [selectedRoom] : []);
 
     const roomNumbersText = rooms.map(r => r.room_number).join(", ");
@@ -74,22 +74,20 @@ const PaymentModal = ({
                             <button
                                 type="button"
                                 onClick={() => setPaymentAmount(Math.round(bookingSummary.total / 2))}
-                                className={`py-3 rounded-xl border-2 transition-all font-bold cursor-pointer ${
-                                    paymentAmount < bookingSummary.total
+                                className={`py-3 rounded-xl border-2 transition-all font-bold cursor-pointer ${paymentAmount < bookingSummary.total
                                         ? "border-indigo-600 text-indigo-600 bg-indigo-50"
                                         : "border-slate-100 text-slate-400 hover:border-slate-200"
-                                }`}
+                                    }`}
                             >
                                 Cọc 50%
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setPaymentAmount(bookingSummary.total)}
-                                className={`py-3 rounded-xl border-2 transition-all font-bold cursor-pointer ${
-                                    paymentAmount === bookingSummary.total
+                                className={`py-3 rounded-xl border-2 transition-all font-bold cursor-pointer ${paymentAmount === bookingSummary.total
                                         ? "border-indigo-600 text-indigo-600 bg-indigo-50"
                                         : "border-slate-100 text-slate-400 hover:border-slate-200"
-                                }`}
+                                    }`}
                             >
                                 Hết 100%
                             </button>
@@ -102,9 +100,9 @@ const PaymentModal = ({
                     </div>
 
                     <div className="flex flex-col items-center py-2">
-                        <img 
-                            src={`https://img.vietqr.io/image/MB-0987654321-compact.png?amount=${paymentAmount}&addInfo=Thanh toan phong ${roomNumbersText || form.full_name}&accountName=KHACH SAN TIVI`} 
-                            alt="Mã QR Thanh toán" 
+                        <img
+                            src={`https://img.vietqr.io/image/MB-0987654321-compact.png?amount=${paymentAmount}&addInfo=Thanh toan phong ${roomNumbersText || form.full_name}&accountName=KHACH SAN TIVI`}
+                            alt="Mã QR Thanh toán"
                             className="w-44 h-44 rounded-xl shadow-md border border-slate-200"
                         />
                         <p className="text-xs text-slate-500 mt-2 text-center">Quét mã QR để chuyển khoản thanh toán</p>

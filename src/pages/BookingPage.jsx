@@ -150,7 +150,6 @@ const BookingPage = () => {
         ...selectedRooms,
         {
           ...room,
-          guestCount: 1, // Mặc định 1 khách
           subtotal: (Number(room.price_per_night) || 0) * nights,
         }
       ]);
@@ -161,24 +160,11 @@ const BookingPage = () => {
     setSelectedRooms(selectedRooms.filter(r => r.id !== roomId));
   };
 
-  const updateGuestCount = (roomId, delta) => {
-    setSelectedRooms(prev =>
-      prev.map(r => {
-        if (r.id !== roomId) return r;
-        const max = r.max_guests || 4;
-        const newCount = Math.max(1, Math.min(max, (r.guestCount || 1) + delta));
-        return { ...r, guestCount: newCount };
-      })
-    );
-  };
-
   const handleShowInvoice = () => {
     if (selectedRooms.length === 0) {
       return alert("Vui lòng chọn ít nhất một phòng trước khi tiếp tục!");
     }
     const total = calculateTotal();
-    const totalGuests = selectedRooms.reduce((sum, r) => sum + (r.guestCount || 1), 0);
-
     const updatedRooms = selectedRooms.map(r => ({
       ...r,
       subtotal: (Number(r.price_per_night) || 0) * nights
@@ -188,7 +174,6 @@ const BookingPage = () => {
       total,
       nights,
       totalRooms: selectedRooms.length,
-      totalGuests,
       rooms: updatedRooms
     });
     setPaymentAmount(Math.round(total / 2)); // Mặc định cọc 50%
@@ -205,8 +190,7 @@ const BookingPage = () => {
         check_in_date: form.check_in,
         check_out_date: form.check_out,
         rooms: selectedRooms.map(r => ({
-          roomId: r.id,
-          guestCount: r.guestCount || 1
+          roomId: r.id
         })),
         payment_amount: paymentAmount,
         payment_method: method
@@ -219,9 +203,6 @@ const BookingPage = () => {
       alert(err.response?.data?.message || err.message || "Lỗi khi xử lý đơn đặt phòng!");
     }
   };
-
-  const totalGuests = selectedRooms.reduce((sum, r) => sum + (r.guestCount || 1), 0);
-
   return (
     <div className="bg-[#f8fafc]">
       <Navbar />
@@ -332,11 +313,10 @@ const BookingPage = () => {
               <div className="grid sm:grid-cols-3 gap-4">
                 <div
                   onClick={() => setSelectedType("")}
-                  className={`p-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col justify-center items-center text-center ${
-                    selectedType === ""
-                      ? "border-indigo-600 bg-indigo-50/50 shadow-md"
-                      : "border-slate-100 hover:border-indigo-200 bg-white"
-                  }`}
+                  className={`p-4 border-2 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col justify-center items-center text-center ${selectedType === ""
+                    ? "border-indigo-600 bg-indigo-50/50 shadow-md"
+                    : "border-slate-100 hover:border-indigo-200 bg-white"
+                    }`}
                 >
                   <Sparkles size={24} className={selectedType === "" ? "text-indigo-600" : "text-slate-400"} />
                   <p className="font-bold text-sm mt-2 text-slate-800">Tất cả hạng phòng</p>
@@ -347,11 +327,10 @@ const BookingPage = () => {
                   <div
                     key={type.id}
                     onClick={() => setSelectedType(type.id)}
-                    className={`relative p-3 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${
-                      selectedType === type.id
-                        ? "border-indigo-600 bg-indigo-50/50 shadow-md"
-                        : "border-slate-100 hover:border-indigo-200 bg-white"
-                    }`}
+                    className={`relative p-3 border-2 rounded-2xl cursor-pointer transition-all duration-300 ${selectedType === type.id
+                      ? "border-indigo-600 bg-indigo-50/50 shadow-md"
+                      : "border-slate-100 hover:border-indigo-200 bg-white"
+                      }`}
                   >
                     <div className="relative h-28 mb-3 overflow-hidden rounded-xl">
                       <img src={type.image1} alt={type.room_name} className="w-full h-full object-cover" />
@@ -422,17 +401,15 @@ const BookingPage = () => {
                         <div
                           key={room.id}
                           onClick={() => toggleRoomSelection(room)}
-                          className={`p-4 rounded-2xl border-2 transition-all cursor-pointer relative flex flex-col justify-between ${
-                            isSelected
-                              ? "border-emerald-500 bg-emerald-50/40 shadow-md ring-2 ring-emerald-500/20"
-                              : "border-slate-200 hover:border-indigo-300 bg-white"
-                          }`}
+                          className={`p-4 rounded-2xl border-2 transition-all cursor-pointer relative flex flex-col justify-between ${isSelected
+                            ? "border-emerald-500 bg-emerald-50/40 shadow-md ring-2 ring-emerald-500/20"
+                            : "border-slate-200 hover:border-indigo-300 bg-white"
+                            }`}
                         >
                           <div>
                             <div className="flex justify-between items-start mb-2">
-                              <span className={`px-2.5 py-1 rounded-lg text-sm font-black ${
-                                isSelected ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"
-                              }`}>
+                              <span className={`px-2.5 py-1 rounded-lg text-sm font-black ${isSelected ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"
+                                }`}>
                                 Phòng {room.room_number}
                               </span>
                               <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
@@ -451,9 +428,8 @@ const BookingPage = () => {
                           </div>
 
                           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                            <span className={`text-xs font-bold flex items-center gap-1 ${
-                              isSelected ? "text-emerald-700" : "text-slate-400"
-                            }`}>
+                            <span className={`text-xs font-bold flex items-center gap-1 ${isSelected ? "text-emerald-700" : "text-slate-400"
+                              }`}>
                               {isSelected ? (
                                 <>
                                   <CheckCircle2 size={15} className="text-emerald-600" /> Đã chọn
@@ -534,35 +510,6 @@ const BookingPage = () => {
                             </button>
                           </div>
 
-                          {/* Bộ chọn số khách */}
-                          <div className="flex justify-between items-center pt-2 border-t border-slate-200/60">
-                            <span className="text-xs text-slate-600 font-medium flex items-center gap-1">
-                              <Users size={13} className="text-slate-400" /> Số khách:
-                            </span>
-                            <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-xl border border-slate-200">
-                              <button
-                                type="button"
-                                onClick={() => updateGuestCount(room.id, -1)}
-                                disabled={(room.guestCount || 1) <= 1}
-                                className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 disabled:opacity-30 cursor-pointer"
-                              >
-                                <Minus size={12} />
-                              </button>
-                              <span className="font-bold text-xs text-slate-800 w-4 text-center">
-                                {room.guestCount || 1}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => updateGuestCount(room.id, 1)}
-                                disabled={(room.guestCount || 1) >= (room.max_guests || 4)}
-                                className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 disabled:opacity-30 cursor-pointer"
-                              >
-                                <Plus size={12} />
-                              </button>
-                              <span className="text-[10px] text-slate-400">/ {room.max_guests || 4}</span>
-                            </div>
-                          </div>
-
                           <div className="text-right text-xs font-bold text-emerald-600">
                             Thành tiền: {roomSubtotal.toLocaleString()}₫
                           </div>
@@ -576,10 +523,6 @@ const BookingPage = () => {
                     <div className="flex justify-between text-xs text-slate-600">
                       <span>Tổng số phòng:</span>
                       <span className="font-semibold text-slate-900">{selectedRooms.length} phòng</span>
-                    </div>
-                    <div className="flex justify-between text-xs text-slate-600">
-                      <span>Tổng số khách:</span>
-                      <span className="font-semibold text-slate-900">{totalGuests} người</span>
                     </div>
                     <div className="flex justify-between text-xs text-slate-600">
                       <span>Thời gian:</span>
