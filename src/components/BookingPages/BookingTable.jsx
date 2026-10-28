@@ -64,9 +64,20 @@ const BookingTable = ({ bookings, loading, limit, onEdit, onDelete }) => {
                   </div>
                 </td>
                 <td className="p-5">
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <DoorOpen size={15} className="text-slate-400" />
-                    <span className="font-semibold text-brand-lake">Phòng {b.room_number}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <DoorOpen size={15} className="text-slate-400 shrink-0" />
+                      <span className="font-semibold text-brand-lake">
+                        {b.rooms && b.rooms.length > 1 
+                          ? `${b.rooms.length} phòng (${b.room_number})` 
+                          : `Phòng ${b.room_number}`}
+                      </span>
+                    </div>
+                    {b.rooms && b.rooms.length > 1 && (
+                      <span className="text-[11px] text-slate-400 pl-6">
+                        {b.rooms.map(r => `P.${r.room_number} (${r.guest_count || 1} khách)`).join(" • ")}
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="p-5 text-sm">

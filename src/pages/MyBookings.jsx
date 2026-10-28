@@ -111,82 +111,117 @@ const MyBookings = () => {
           <EmptyState onNavigate={() => navigate('/home')} />
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {bookings.map((booking) => (
-              <div
-                key={booking.id}
-                className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col shadow-sm"
-              >
-                {/* IMAGE SECTION */}
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={booking.room_type?.image1 || booking.room?.room_type?.image1 || booking.image1}
-                    alt={`Phòng ${booking.room_number}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 left-3 shadow-sm">
-                    {renderStatusBadge(booking.status)}
-                  </div>
-                </div>
+            {bookings.map((booking) => {
+              const roomsCount = booking.rooms?.length || 1;
+              const hasMultipleRooms = roomsCount > 1;
 
-                {/* CONTENT SECTION */}
-                <div className="p-6 space-y-4 flex-1">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-xl font-bold text-gray-800">Phòng {booking.room_number}</h3>
-                    <div className="text-right">
-                      <p className="text-amber-600 font-bold text-xl font-mono">
-                        {Number(booking.total_price).toLocaleString()}đ
-                      </p>
+              return (
+                <div
+                  key={booking.id}
+                  className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col shadow-sm"
+                >
+                  {/* IMAGE SECTION */}
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={booking.room_type?.image1 || booking.room?.room_type?.image1 || booking.image1 || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80"}
+                      alt={`Đơn đặt phòng #${booking.id}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-3 left-3 shadow-sm flex items-center gap-1.5">
+                      {renderStatusBadge(booking.status)}
+                      {hasMultipleRooms && (
+                        <span className="bg-indigo-600/90 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider backdrop-blur-xs">
+                          {roomsCount} phòng
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex items-center text-sm text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <span className="flex-1 text-center font-medium">{new Date(booking.check_in_date).toLocaleDateString()}</span>
-                    <span className="px-3 text-amber-500 font-bold">→</span>
-                    <span className="flex-1 text-center font-medium">{new Date(booking.check_out_date).toLocaleDateString()}</span>
-                  </div>
+                  {/* CONTENT SECTION */}
+                  <div className="p-6 space-y-4 flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-xs font-mono font-semibold text-slate-400">Đơn hàng #{booking.id}</span>
+                        <h3 className="text-xl font-bold text-gray-800">
+                          {hasMultipleRooms ? `Đặt ${roomsCount} phòng` : `Phòng ${booking.room_number}`}
+                        </h3>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-amber-600 font-bold text-xl font-mono">
+                          {Number(booking.total_price).toLocaleString()}đ
+                        </p>
+                      </div>
+                    </div>
 
-                  <div className="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
-                    <span className="text-gray-500">Thanh toán:</span>
-                    <span className={`font-bold ${booking.payment_status === 'PAID' ? 'text-green-600' :
-                      booking.payment_status === 'PARTIAL_PAID' ? 'text-amber-500' : 'text-red-500'
-                      }`}>
-                      {booking.payment_status === 'PAID' ? '✓ Đã xong' :
-                        booking.payment_status === 'PARTIAL_PAID' ? 'Một phần' : 'Chưa thanh toán'}
-                    </span>
-                  </div>
+                    {/* Danh sách các phòng trong đơn */}
+                    {booking.rooms && booking.rooms.length > 0 ? (
+                      <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-100 max-h-36 overflow-y-auto">
+                        {booking.rooms.map((rm, idx) => (
+                          <div key={idx} className="flex justify-between items-center text-xs">
+                            <span className="font-semibold text-slate-800">
+                              Phòng {rm.room_number} <span className="text-[10px] font-normal text-slate-500">({rm.room_name})</span>
+                            </span>
+                            <span className="text-slate-600 font-medium">
+                              {rm.guest_count} khách • {Number(rm.subtotal).toLocaleString()}₫
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                        Phòng: <b>{booking.room_number}</b>
+                      </div>
+                    )}
 
-                  {booking.remaining_amount > 0 && (
-                    <div className="bg-amber-50 p-3 rounded-xl flex justify-between items-center border border-amber-100">
-                      <span className="text-xs text-amber-700 uppercase font-bold tracking-tight">Dư nợ:</span>
-                      <span className="text-amber-600 font-black">
-                        {Number(booking.remaining_amount).toLocaleString()}đ
+                    <div className="flex items-center text-sm text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      <span className="flex-1 text-center font-medium">{new Date(booking.check_in_date).toLocaleDateString()}</span>
+                      <span className="px-3 text-amber-500 font-bold">→</span>
+                      <span className="flex-1 text-center font-medium">{new Date(booking.check_out_date).toLocaleDateString()}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
+                      <span className="text-gray-500">Thanh toán:</span>
+                      <span className={`font-bold ${booking.payment_status === 'PAID' ? 'text-green-600' :
+                        booking.payment_status === 'PARTIAL_PAID' ? 'text-amber-500' : 'text-red-500'
+                        }`}>
+                        {booking.payment_status === 'PAID' ? '✓ Đã xong' :
+                          booking.payment_status === 'PARTIAL_PAID' ? 'Một phần (50%)' : 'Chưa thanh toán'}
                       </span>
                     </div>
-                  )}
 
-                  {/* ACTION BUTTONS */}
-                  <div className="flex gap-3 pt-2">
-                    {booking.remaining_amount > 0 && booking.status !== 'cancelled' && (
-                      <button
-                        onClick={() => setPayingBooking(booking)}
-                        className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl text-sm font-bold transition shadow-md shadow-amber-200"
-                      >
-                        Thanh toán ngay
-                      </button>
+                    {booking.remaining_amount > 0 && (
+                      <div className="bg-amber-50 p-3 rounded-xl flex justify-between items-center border border-amber-100">
+                        <span className="text-xs text-amber-700 uppercase font-bold tracking-tight">Dư nợ:</span>
+                        <span className="text-amber-600 font-black">
+                          {Number(booking.remaining_amount).toLocaleString()}đ
+                        </span>
+                      </div>
                     )}
 
-                    {booking.status?.toLowerCase() === 'booked' && (
-                      <button
-                        onClick={() => handleCancel(booking.id)}
-                        className="flex-1 border border-gray-200 hover:border-red-500 hover:bg-red-50 text-gray-500 hover:text-red-600 py-3 rounded-xl text-sm font-semibold transition"
-                      >
-                        Hủy đặt
-                      </button>
-                    )}
+                    {/* ACTION BUTTONS */}
+                    <div className="flex gap-3 pt-2">
+                      {booking.remaining_amount > 0 && booking.status !== 'cancelled' && (
+                        <button
+                          onClick={() => setPayingBooking(booking)}
+                          className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl text-sm font-bold transition shadow-md shadow-amber-200 cursor-pointer"
+                        >
+                          Thanh toán ngay
+                        </button>
+                      )}
+
+                      {booking.status?.toLowerCase() === 'booked' && (
+                        <button
+                          onClick={() => handleCancel(booking.id)}
+                          className="flex-1 border border-gray-200 hover:border-red-500 hover:bg-red-50 text-gray-500 hover:text-red-600 py-3 rounded-xl text-sm font-semibold transition cursor-pointer"
+                        >
+                          Hủy đơn đặt
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
