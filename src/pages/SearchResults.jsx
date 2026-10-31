@@ -124,8 +124,9 @@ function SearchRoomCard({ room }) {
 
 /* ---- Trang kết quả tìm kiếm ---- */
 const SearchResults = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const keyword = searchParams.get("keyword") || "";
+  const sort = searchParams.get("sort") || "";
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -142,7 +143,7 @@ const SearchResults = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await roomService.getRoomTypesSearch(keyword);
+        const res = await roomService.getRoomTypesSearch(keyword, sort);
         if (!cancelled) {
           setResults(Array.isArray(res.data) ? res.data : []);
         }
@@ -159,7 +160,17 @@ const SearchResults = () => {
     return () => {
       cancelled = true;
     };
-  }, [keyword]);
+  }, [keyword, sort]);
+
+  const handleSortChange = (event) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (event.target.value) {
+      nextParams.set("sort", event.target.value);
+    } else {
+      nextParams.delete("sort");
+    }
+    setSearchParams(nextParams);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -247,13 +258,27 @@ const SearchResults = () => {
         {/* Hiển thị kết quả */}
         {!loading && !error && results.length > 0 && (
           <>
-            <p className="text-gray-500 mb-6 text-sm">
-              Tìm thấy{" "}
-              <span className="font-bold text-amber-600 text-base">
-                {results.length}
-              </span>{" "}
-              loại phòng phù hợp
-            </p>
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-gray-500 text-sm">
+                Tìm thấy{" "}
+                <span className="font-bold text-amber-600 text-base">
+                  {results.length}
+                </span>{" "}
+                loại phòng phù hợp
+              </p>
+              <label className="flex items-center gap-3 text-sm font-medium text-gray-700">
+                Sắp xếp theo giá
+                <select
+                  value={sort}
+                  onChange={handleSortChange}
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-700 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                >
+                  <option value="">Mặc định</option>
+                  <option value="price_asc">Giá thấp đến cao</option>
+                  <option value="price_desc">Giá cao đến thấp</option>
+                </select>
+              </label>
+            </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {results.map((room) => (
                 <SearchRoomCard key={room.id} room={room} />
