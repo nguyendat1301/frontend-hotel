@@ -1,12 +1,29 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Loading from '../pages/Loading';
 import { AuthContext } from './AuthContext';
+import { AUTH_SESSION_EXPIRED_EVENT } from '../services/authEvents';
 
 const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState('');
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      localStorage.removeItem('user');
+      setUser(null);
+      setAuthError('');
+      navigate('/login', { replace: true });
+    };
+
+    window.addEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionExpired);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_EXPIRED_EVENT, handleSessionExpired);
+    };
+  }, [navigate]);
 
   useEffect(() => {
     let isMounted = true;
@@ -50,6 +67,7 @@ const AuthProvider = ({ children }) => {
       role: response.data.user.role_user || response.data.user.role,
     };
     setUser(userData);
+    setAuthError('');
     return response.data;
   };
 
@@ -60,6 +78,7 @@ const AuthProvider = ({ children }) => {
       role: response.data.user.role_user || response.data.user.role,
     };
     setUser(userData);
+    setAuthError('');
     return response.data;
   };
 

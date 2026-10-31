@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, CheckCircle2, X, XCircle } from 'lucide-react';
 import Navbar from '../components/Home/HomeNavabar';
 import { useAuth } from '../hooks/useAuth.js';
 import { bookingService } from '../services/bookingService';
@@ -10,9 +11,20 @@ const MyBookings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [payingBooking, setPayingBooking] = useState(null);
+  const [bookingToCancel, setBookingToCancel] = useState(null);
+  const [notification, setNotification] = useState(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
 
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!notification) return undefined;
+
+    const timeout = setTimeout(() => setNotification(null), 4000);
+    return () => clearTimeout(timeout);
+  }, [notification]);
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -36,27 +48,38 @@ const MyBookings = () => {
     fetchBookings();
   }, [user, navigate, fetchBookings]);
 
-  const handleCancel = async (bookingId) => {
-    if (!window.confirm('Bạn có chắc muốn hủy phòng này?')) return;
+  const handleCancel = async () => {
+    if (!bookingToCancel) return;
+
+    setIsCancelling(true);
     try {
-      await bookingService.updateStatus(bookingId, { status: 'cancelled' });
-      alert('Hủy thành công');
-      fetchBookings();
+      await bookingService.updateStatus(bookingToCancel.id, { status: 'cancelled' });
+      setNotification({ type: 'success', message: `Đã hủy đơn đặt phòng #${bookingToCancel.id}.` });
+      setBookingToCancel(null);
+      await fetchBookings();
     } catch {
-      alert('Lỗi khi hủy phòng');
+      setNotification({ type: 'error', message: 'Không thể hủy phòng. Vui lòng thử lại.' });
+    } finally {
+      setIsCancelling(false);
     }
   };
 
   const confirmPayFull = async (bookingId) => {
+    setIsPaying(true);
     try {
       const res = await bookingService.payFull(bookingId, {
         payment_method: 'transfer',
       });
-      alert(res.data.message || 'Thanh toán thành công');
+      setNotification({
+        type: 'success',
+        message: res.data.message || 'Thanh toán thành công.',
+      });
       setPayingBooking(null);
-      fetchBookings();
+      await fetchBookings();
     } catch {
-      alert('Thanh toán lỗi');
+      setNotification({ type: 'error', message: 'Thanh toán không thành công. Vui lòng thử lại.' });
+    } finally {
+      setIsPaying(false);
     }
   };
 
@@ -90,6 +113,31 @@ const MyBookings = () => {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 pt-24 pb-10">
       <Navbar />
+
+      {notification && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed right-4 top-20 z-[120] flex max-w-sm items-start gap-3 rounded-xl border p-4 shadow-lg ${
+            notification.type === 'success'
+              ? 'border-emerald-200 bg-white text-emerald-800'
+              : 'border-red-200 bg-white text-red-800'
+          }`}
+        >
+          {notification.type === 'success'
+            ? <CheckCircle2 className="mt-0.5 shrink-0 text-emerald-600" size={20} />
+            : <XCircle className="mt-0.5 shrink-0 text-red-600" size={20} />}
+          <p className="flex-1 text-sm font-medium">{notification.message}</p>
+          <button
+            type="button"
+            onClick={() => setNotification(null)}
+            aria-label="Đóng thông báo"
+            className="text-slate-400 transition hover:text-slate-700"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
 
       <div className="max-w-6xl mx-auto px-4">
         <header className="flex justify-between items-end mb-8 border-b border-gray-200 pb-6">
@@ -212,7 +260,7 @@ const MyBookings = () => {
 
                       {booking.status?.toLowerCase() === 'booked' && (
                         <button
-                          onClick={() => handleCancel(booking.id)}
+                          onClick={() => setBookingToCancel(booking)}
                           className="flex-1 border border-gray-200 hover:border-red-500 hover:bg-red-50 text-gray-500 hover:text-red-600 py-3 rounded-xl text-sm font-semibold transition cursor-pointer"
                         >
                           Hủy đơn đặt
@@ -226,6 +274,53 @@ const MyBookings = () => {
           </div>
         )}
       </div>
+
+      {bookingToCancel && (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !isCancelling) {
+              setBookingToCancel(null);
+            }
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cancel-booking-title"
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600">
+              <AlertTriangle size={24} />
+            </div>
+            <h2 id="cancel-booking-title" className="text-xl font-bold text-slate-900">
+              Hủy đơn đặt phòng?
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Bạn có chắc chắn muốn hủy đơn <strong>#{bookingToCancel.id}</strong> không?
+              Thao tác này sẽ cập nhật trạng thái đơn đặt phòng.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                disabled={isCancelling}
+                onClick={() => setBookingToCancel(null)}
+                className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Giữ đơn
+              </button>
+              <button
+                type="button"
+                disabled={isCancelling}
+                onClick={handleCancel}
+                className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isCancelling ? 'Đang hủy...' : 'Xác nhận hủy'}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* QR PAYMENT MODAL - Trắng trên nền Overlay xám nhẹ */}
       {payingBooking && (
@@ -249,10 +344,11 @@ const MyBookings = () => {
               </div>
 
               <button
+                disabled={isPaying}
                 onClick={() => confirmPayFull(payingBooking.id)}
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-amber-200 transition-all mb-4"
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-amber-200 transition-all mb-4 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Tôi đã chuyển khoản
+                {isPaying ? 'Đang xác nhận...' : 'Tôi đã chuyển khoản'}
               </button>
 
               <button
