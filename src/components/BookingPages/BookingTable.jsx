@@ -1,5 +1,6 @@
 import React from "react";
 import { Edit, Trash2, DoorOpen, Search } from "lucide-react";
+import { formatDateOnly } from "../../utils/dateOnly";
 
 const BookingTable = ({ bookings, loading, limit, onEdit, onDelete }) => {
   // Hàm phụ trợ style (giữ nguyên logic của bạn)
@@ -82,8 +83,8 @@ const BookingTable = ({ bookings, loading, limit, onEdit, onDelete }) => {
                 </td>
                 <td className="p-5 text-sm">
                   <div className="flex flex-col text-slate-600">
-                    <span className="font-medium">{new Date(b.check_in_date).toLocaleDateString("vi-VN")}</span>
-                    <span className="text-slate-400 text-xs mt-0.5">đến {new Date(b.check_out_date).toLocaleDateString("vi-VN")}</span>
+                    <span className="font-medium">{formatDateOnly(b.check_in_date)}</span>
+                    <span className="text-slate-400 text-xs mt-0.5">đến {formatDateOnly(b.check_out_date)}</span>
                   </div>
                 </td>
                 <td className="p-5">

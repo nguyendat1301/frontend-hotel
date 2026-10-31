@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import api from "../../services/api";
+import { useEffect, useState, useCallback } from "react";
 import { customerService } from "../../services/customerService";
 import Create from "../../components/Customer/Create";
 import Pagination from "../../components/common/Pagination";
@@ -32,27 +31,43 @@ const Customers = () => {
     id_card: ""
   });
 
-  const fetchCustomers = async (page = 1, search = "") => {
-    try {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
+  const fetchCustomers = useCallback(async (page = 1, search = "") => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (search) params.append("search", search);
+
+    const res = await customerService.getCustomers(params);
+    return res.data;
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    fetchCustomers(currentPage, searchQuery)
+      .then((result) => {
+        if (!active) return;
+        setCustomers(result.data);
+        setTotalPages(result.pagination.totalPages);
+      })
+      .catch((err) => {
+        console.error("Lỗi fetch customers:", err);
       });
-      if (search) params.append("search", search);
 
-      const res = await customerService.getCustomers(params);
+    return () => {
+      active = false;
+    };
+  }, [currentPage, searchQuery, fetchCustomers]);
 
-      // Backend trả về: { data: [...], pagination: { totalPages: ... } }
-      setCustomers(res.data.data);
-      setTotalPages(res.data.pagination.totalPages);
+  const refreshCustomers = async (page = 1, search = "") => {
+    try {
+      const result = await fetchCustomers(page, search);
+      setCustomers(result.data);
+      setTotalPages(result.pagination.totalPages);
     } catch (err) {
       console.error("Lỗi fetch customers:", err);
     }
   };
-
-  useEffect(() => {
-    fetchCustomers(currentPage, searchQuery);
-  }, [currentPage, searchQuery]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -81,14 +96,15 @@ const Customers = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const page = editingId ? currentPage : 1;
       if (editingId) {
         await customerService.updateCustomer(editingId, formData);
       } else {
         await customerService.createCustomer(formData);
-        setCurrentPage(1);
       }
       setIsModalOpen(false);
-      fetchCustomers(currentPage, searchQuery);
+      setCurrentPage(page);
+      await refreshCustomers(page, searchQuery);
     } catch (err) {
       alert(err.response?.data?.message || err.message);
     }
@@ -98,18 +114,10 @@ const Customers = () => {
     if (!window.confirm("Bạn có chắc muốn xóa khách hàng này?")) return;
     try {
       await customerService.deleteCustomer(id);
-      fetchCustomers(currentPage, searchQuery);
-    } catch (err) {
+      await refreshCustomers(currentPage, searchQuery);
+    } catch {
       alert("Không thể xóa khách hàng");
     }
-  };
-
-  const getPages = () => {
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(totalPages, currentPage + 2);
-    let pages = [];
-    for (let i = start; i <= end; i++) pages.push(i);
-    return pages;
   };
 
   return (

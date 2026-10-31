@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import api from "../../services/api";
 import {
   Edit,
@@ -29,38 +29,38 @@ const Rooms = () => {
   });
 
   // ================= FETCH ROOMS =================
-  const fetchRooms = async (page = 1, search = "") => {
-    try {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
-      });
-      if (search) {
-        params.append("search", search);
-      }
-      const res = await api.get(
-        `/rooms?${params.toString()}`
-      );
-      setRooms(res.data.data);
-      setTotalPages(res.data.pagination.totalPages);
-    } catch (err) {
-      console.error("Lỗi fetch rooms:", err);
+  const fetchRooms = useCallback(async (page = 1, search = "") => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (search) {
+      params.append("search", search);
     }
-  };
+    const res = await api.get(`/rooms?${params.toString()}`);
+    return res.data;
+  }, []);
 
   // ================= FETCH ROOM TYPES =================
-  const fetchRoomTypes = async () => {
-    try {
-      const res = await api.get("/room-types");
-      setRoomTypes(res.data);
-    } catch (err) {
-      console.error("Lỗi fetch room types:", err);
-    }
-  };
+  const fetchRoomTypes = useCallback(async () => {
+    const res = await api.get("/room-types");
+    return res.data;
+  }, []);
 
   useEffect(() => {
-    fetchRooms(currentPage, searchQuery);
-  }, [currentPage, searchQuery]);
+    let active = true;
+    fetchRooms(currentPage, searchQuery)
+      .then((result) => {
+        if (!active) return;
+        setRooms(result.data);
+        setTotalPages(result.pagination.totalPages);
+      })
+      .catch((err) => console.error("Lỗi fetch rooms:", err));
+
+    return () => {
+      active = false;
+    };
+  }, [currentPage, searchQuery, fetchRooms]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -72,8 +72,27 @@ const Rooms = () => {
   }, [searchInput]);
 
   useEffect(() => {
-    fetchRoomTypes();
-  }, []);
+    let active = true;
+    fetchRoomTypes()
+      .then((data) => {
+        if (active) setRoomTypes(data);
+      })
+      .catch((err) => console.error("Lỗi fetch room types:", err));
+
+    return () => {
+      active = false;
+    };
+  }, [fetchRoomTypes]);
+
+  const refreshRooms = async (page = 1, search = "") => {
+    try {
+      const result = await fetchRooms(page, search);
+      setRooms(result.data);
+      setTotalPages(result.pagination.totalPages);
+    } catch (err) {
+      console.error("Lỗi fetch rooms:", err);
+    }
+  };
 
   // ================= OPEN MODAL =================
   const openModal = (room = null) => {
@@ -113,7 +132,7 @@ const Rooms = () => {
       }
 
       setIsModalOpen(false);
-      fetchRooms(currentPage, searchQuery);
+      await refreshRooms(currentPage, searchQuery);
     } catch (err) {
       alert(err.response?.data?.message || err.message);
     }
@@ -129,24 +148,11 @@ const Rooms = () => {
       if (rooms.length === 1 && currentPage > 1) {
         setCurrentPage(prev => prev - 1);
       } else {
-        fetchRooms(currentPage, searchQuery);
+        await refreshRooms(currentPage, searchQuery);
       }
-    } catch (err) {
+    } catch {
       alert("Không thể xóa");
     }
-  };
-
-  // ================= PAGINATION =================
-  const getPages = () => {
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(totalPages, currentPage + 2);
-    let pages = [];
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    return pages;
   };
 
   return (

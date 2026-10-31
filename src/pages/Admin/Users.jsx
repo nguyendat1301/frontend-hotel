@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import api from "../../services/api";
 import { Edit, UserX, UserMinus, Plus, KeyRound, ChevronLeft, ChevronRight } from "lucide-react";
 import UserModal from "../../components/Admin/UserModal";
 import Pagination from "../../components/common/Pagination";
@@ -63,7 +62,7 @@ const Users = () => {
                 // Load lại trang hiện tại sau khi xóa
                 fetchUsers(pagination.currentPage);
                 alert("Đã xóa thành công!");
-            } catch (err) {
+            } catch {
                 alert("Không thể xóa người dùng này.");
             }
         }
@@ -76,7 +75,7 @@ const Users = () => {
                 // Load lại trang hiện tại sau khi xóa
                 fetchUsers(pagination.currentPage);
                 alert("Đã xóa vĩnh viễn!");
-            } catch (err) {
+            } catch {
                 alert("Không thể xóa người dùng này.");
             }
         }
@@ -103,7 +102,7 @@ const Users = () => {
             try {
                 await userService.updatePassword(user.id, randomPassword);
                 alert(`Thành công! Mật khẩu mới là: ${randomPassword}`);
-            } catch (err) {
+            } catch {
                 alert("Lỗi khi đặt lại mật khẩu!");
             }
         }

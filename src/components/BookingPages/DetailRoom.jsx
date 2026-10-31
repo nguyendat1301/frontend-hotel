@@ -1,6 +1,8 @@
 import { X, Users, BedDouble, Info, ImageIcon } from "lucide-react";
 
-const DetailRoom = ({ viewingRoomDetail, setViewingRoomDetail, setSelectedType, selectedRoom }) => {
+const FALLBACK_IMAGE = "https://via.placeholder.com/800x450?text=Room";
+
+const DetailRoom = ({ viewingRoomDetail, setViewingRoomDetail, selectedRoom }) => {
     // Nếu cả 2 state đều trống thì không hiện modal
     if (!viewingRoomDetail && !selectedRoom) return null;
 
@@ -27,7 +29,7 @@ const DetailRoom = ({ viewingRoomDetail, setViewingRoomDetail, setSelectedType, 
                             className="w-full h-full object-cover" 
                             alt="Room" 
                             // Xử lý nếu link ảnh từ server bị lỗi
-                            onError={(e) => { e.target.src = fallbackImage; }}
+                            onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; }}
                         />
                     ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">

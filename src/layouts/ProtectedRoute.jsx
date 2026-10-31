@@ -1,8 +1,13 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth.js';
+import Loading from '../pages/Loading';
 
 const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   // Chưa đăng nhập
   if (!user) {
@@ -10,7 +15,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   // Không phải admin
-  if (user.role !== 'admin') {
+  if (String(user.role || '').toLowerCase() !== 'admin') {
     return <Navigate to="/" replace />;
   }
 

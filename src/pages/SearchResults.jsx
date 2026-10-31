@@ -4,7 +4,8 @@ import Navbar from "../components/Home/HomeNavabar";
 import Footer from "../components/Home/HomeFooter";
 import { roomService } from "../services/roomService";
 import Loading from "./Loading";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth.js";
+import Pagination from "../components/common/Pagination";
 
 const PLACEHOLDER =
   "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80";
@@ -124,15 +125,26 @@ function SearchRoomCard({ room }) {
 
 /* ---- Trang kết quả tìm kiếm ---- */
 const SearchResults = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const keyword = searchParams.get("keyword") || "";
+  const sort = searchParams.get("sort") || "";
+  const requestedPage = Number(searchParams.get("page"));
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0
+    ? requestedPage
+    : 1;
   const [results, setResults] = useState([]);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 0,
+    totalItems: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!keyword) {
       setResults([]);
+      setPagination({ currentPage: 1, totalPages: 0, totalItems: 0 });
       setLoading(false);
       return;
     }
@@ -142,14 +154,25 @@ const SearchResults = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await roomService.getRoomTypesSearch(keyword);
+        const res = await roomService.getRoomTypesSearch(keyword, sort, page);
         if (!cancelled) {
-          setResults(Array.isArray(res.data) ? res.data : []);
+          setResults(Array.isArray(res.data?.data) ? res.data.data : []);
+          setPagination(res.data?.pagination || {
+            currentPage: 1,
+            totalPages: 0,
+            totalItems: 0,
+          });
+          if (res.data?.pagination?.currentPage && res.data.pagination.currentPage !== page) {
+            const nextParams = new URLSearchParams(searchParams);
+            nextParams.set("page", String(res.data.pagination.currentPage));
+            setSearchParams(nextParams, { replace: true });
+          }
         }
-      } catch (err) {
+      } catch {
         if (!cancelled) {
           setError("Có lỗi xảy ra khi tìm kiếm. Vui lòng thử lại.");
           setResults([]);
+          setPagination({ currentPage: 1, totalPages: 0, totalItems: 0 });
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -159,7 +182,24 @@ const SearchResults = () => {
     return () => {
       cancelled = true;
     };
-  }, [keyword]);
+  }, [keyword, sort, page, searchParams, setSearchParams]);
+
+  const handleSortChange = (event) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (event.target.value) {
+      nextParams.set("sort", event.target.value);
+    } else {
+      nextParams.delete("sort");
+    }
+    nextParams.delete("page");
+    setSearchParams(nextParams);
+  };
+
+  const handlePageChange = (nextPage) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("page", String(nextPage));
+    setSearchParams(nextParams);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -222,7 +262,7 @@ const SearchResults = () => {
         )}
 
         {/* Không tìm thấy */}
-        {!loading && !error && keyword && results.length === 0 && (
+        {!loading && !error && keyword && pagination.totalItems === 0 && (
           <div className="text-center py-20">
             <div className="text-7xl mb-6">😔</div>
             <h2 className="text-2xl font-bold text-gray-700 mb-2">
@@ -245,20 +285,39 @@ const SearchResults = () => {
         )}
 
         {/* Hiển thị kết quả */}
-        {!loading && !error && results.length > 0 && (
+        {!loading && !error && pagination.totalItems > 0 && (
           <>
-            <p className="text-gray-500 mb-6 text-sm">
-              Tìm thấy{" "}
-              <span className="font-bold text-amber-600 text-base">
-                {results.length}
-              </span>{" "}
-              loại phòng phù hợp
-            </p>
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-gray-500 text-sm">
+                Tìm thấy{" "}
+                <span className="font-bold text-amber-600 text-base">
+                  {pagination.totalItems}
+                </span>{" "}
+                loại phòng phù hợp
+              </p>
+              <label className="flex items-center gap-3 text-sm font-medium text-gray-700">
+                Sắp xếp theo giá
+                <select
+                  value={sort}
+                  onChange={handleSortChange}
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-700 shadow-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                >
+                  <option value="">Mặc định</option>
+                  <option value="price_asc">Giá thấp đến cao</option>
+                  <option value="price_desc">Giá cao đến thấp</option>
+                </select>
+              </label>
+            </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {results.map((room) => (
                 <SearchRoomCard key={room.id} room={room} />
               ))}
             </div>
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              onPageChange={handlePageChange}
+            />
           </>
         )}
       </div>
