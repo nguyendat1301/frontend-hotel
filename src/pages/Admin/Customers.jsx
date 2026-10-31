@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import api from "../../services/api";
+import { useEffect, useState, useCallback } from "react";
 import { customerService } from "../../services/customerService";
 import Create from "../../components/Customer/Create";
 import Pagination from "../../components/common/Pagination";
@@ -32,7 +31,7 @@ const Customers = () => {
     id_card: ""
   });
 
-  const fetchCustomers = async (page = 1, search = "") => {
+  const fetchCustomers = useCallback(async (page = 1, search = "") => {
     try {
       const params = new URLSearchParams({
         page: String(page),
@@ -48,11 +47,11 @@ const Customers = () => {
     } catch (err) {
       console.error("Lỗi fetch customers:", err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCustomers(currentPage, searchQuery);
-  }, [currentPage, searchQuery]);
+  }, [currentPage, searchQuery, fetchCustomers]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -99,17 +98,9 @@ const Customers = () => {
     try {
       await customerService.deleteCustomer(id);
       fetchCustomers(currentPage, searchQuery);
-    } catch (err) {
+    } catch {
       alert("Không thể xóa khách hàng");
     }
-  };
-
-  const getPages = () => {
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(totalPages, currentPage + 2);
-    let pages = [];
-    for (let i = start; i <= end; i++) pages.push(i);
-    return pages;
   };
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import api from "../../services/api";
 import { Edit, Trash2, Plus, Users, DollarSign } from "lucide-react";
 import RoomTypeModal from "../../components/Admin/RoomTypeModal";
@@ -17,16 +17,16 @@ const RoomTypes = () => {
         image2: ""
     });
 
-    const fetchRooms = async () => {
+    const fetchRooms = useCallback(async () => {
         try {
             const res = await api.get("/room-types");
             setRooms(res.data);
         } catch (error) {
             console.error("Lỗi khi tải dữ liệu:", error);
         }
-    };
+    }, []);
 
-    useEffect(() => { fetchRooms(); }, []);
+    useEffect(() => { fetchRooms(); }, [fetchRooms]);
 
     const handleOpenAdd = () => {
         setEditingId(null);

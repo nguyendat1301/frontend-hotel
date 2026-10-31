@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Home/HomeNavabar';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth.js';
 import { bookingService } from '../services/bookingService';
 import { formatDateOnly } from '../utils/dateOnly';
 

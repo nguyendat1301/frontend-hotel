@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import api from "../../services/api";
 import { bookingService } from "../../services/bookingService";
 import Pagination from "../../components/common/Pagination";
 import {
@@ -93,7 +92,7 @@ const Bookings = () => {
     try {
       await bookingService.deleteBooking(id);
       fetchBookings(currentPage);
-    } catch (err) {
+    } catch {
       alert("Không thể xóa");
     }
   };

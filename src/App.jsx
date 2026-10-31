@@ -1,6 +1,6 @@
 // src/App.jsx
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './hooks/useAuth';
+import { AuthProvider } from './hooks/useAuth.jsx';
 import AppRoutes from './routes';
 
 function App() {

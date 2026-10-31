@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
-import api from "../services/api";
+import { useAuth } from "../hooks/useAuth.js";
 import Navbar from "../components/Home/HomeNavabar";
 import Footer from "../components/Home/HomeFooter";
 import { userService } from "../services/userService";

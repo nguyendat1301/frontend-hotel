@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import api from "../../services/api";
 import { Edit, UserX, UserMinus, Plus, KeyRound, ChevronLeft, ChevronRight } from "lucide-react";
 import UserModal from "../../components/Admin/UserModal";
 import Pagination from "../../components/common/Pagination";

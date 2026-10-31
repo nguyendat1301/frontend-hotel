@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth.js";
 import { useNavigate } from "react-router-dom";
 import {
   Calendar, User, CreditCard, Phone, Mail,
@@ -52,7 +52,7 @@ const BookingPage = () => {
         const res = await roomService.getRoomTypes();
         setRoomTypes(res.data);
       } catch (err) {
-        console.error("Lỗi tải loại phòng");
+        console.error("Lỗi tải loại phòng:", err);
       }
     };
 
@@ -179,7 +179,6 @@ const BookingPage = () => {
 
   const handleFinalBooking = async (method) => {
     try {
-      const total = calculateTotal();
       const payload = {
         full_name: form.full_name,
         phone: form.phone,
