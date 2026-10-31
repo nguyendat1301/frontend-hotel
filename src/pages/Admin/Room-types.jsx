@@ -18,15 +18,32 @@ const RoomTypes = () => {
     });
 
     const fetchRooms = useCallback(async () => {
+        const res = await api.get("/room-types");
+        return res.data;
+    }, []);
+
+    useEffect(() => {
+        let active = true;
+        fetchRooms()
+            .then((data) => {
+                if (active) setRooms(data);
+            })
+            .catch((error) => {
+                console.error("Lỗi khi tải dữ liệu:", error);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [fetchRooms]);
+
+    const refreshRooms = async () => {
         try {
-            const res = await api.get("/room-types");
-            setRooms(res.data);
+            setRooms(await fetchRooms());
         } catch (error) {
             console.error("Lỗi khi tải dữ liệu:", error);
         }
-    }, []);
-
-    useEffect(() => { fetchRooms(); }, [fetchRooms]);
+    };
 
     const handleOpenAdd = () => {
         setEditingId(null);
@@ -43,7 +60,7 @@ const RoomTypes = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa loại phòng này?")) {
             await api.delete(`/room-types/${id}`);
-            fetchRooms();
+            await refreshRooms();
         }
     };
 
@@ -102,7 +119,7 @@ const RoomTypes = () => {
             });
 
             setIsModalOpen(false);
-            fetchRooms();
+            await refreshRooms();
 
         } catch (err) {
             console.error(err);

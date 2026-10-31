@@ -32,26 +32,42 @@ const Customers = () => {
   });
 
   const fetchCustomers = useCallback(async (page = 1, search = "") => {
-    try {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(limit),
-      });
-      if (search) params.append("search", search);
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (search) params.append("search", search);
 
-      const res = await customerService.getCustomers(params);
-
-      // Backend trả về: { data: [...], pagination: { totalPages: ... } }
-      setCustomers(res.data.data);
-      setTotalPages(res.data.pagination.totalPages);
-    } catch (err) {
-      console.error("Lỗi fetch customers:", err);
-    }
+    const res = await customerService.getCustomers(params);
+    return res.data;
   }, []);
 
   useEffect(() => {
-    fetchCustomers(currentPage, searchQuery);
+    let active = true;
+    fetchCustomers(currentPage, searchQuery)
+      .then((result) => {
+        if (!active) return;
+        setCustomers(result.data);
+        setTotalPages(result.pagination.totalPages);
+      })
+      .catch((err) => {
+        console.error("Lỗi fetch customers:", err);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [currentPage, searchQuery, fetchCustomers]);
+
+  const refreshCustomers = async (page = 1, search = "") => {
+    try {
+      const result = await fetchCustomers(page, search);
+      setCustomers(result.data);
+      setTotalPages(result.pagination.totalPages);
+    } catch (err) {
+      console.error("Lỗi fetch customers:", err);
+    }
+  };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -80,14 +96,15 @@ const Customers = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const page = editingId ? currentPage : 1;
       if (editingId) {
         await customerService.updateCustomer(editingId, formData);
       } else {
         await customerService.createCustomer(formData);
-        setCurrentPage(1);
       }
       setIsModalOpen(false);
-      fetchCustomers(currentPage, searchQuery);
+      setCurrentPage(page);
+      await refreshCustomers(page, searchQuery);
     } catch (err) {
       alert(err.response?.data?.message || err.message);
     }
@@ -97,7 +114,7 @@ const Customers = () => {
     if (!window.confirm("Bạn có chắc muốn xóa khách hàng này?")) return;
     try {
       await customerService.deleteCustomer(id);
-      fetchCustomers(currentPage, searchQuery);
+      await refreshCustomers(currentPage, searchQuery);
     } catch {
       alert("Không thể xóa khách hàng");
     }
