@@ -12,6 +12,7 @@ import { bookingService } from "../services/bookingService";
 import { roomService } from "../services/roomService";
 import Pay from "../components/BookingPages/Pay";
 import DetailRoom from "../components/BookingPages/DetailRoom";
+import { calculateDateNights, getTodayDateOnly } from "../utils/dateOnly";
 
 const BookingPage = () => {
   const [form, setForm] = useState({
@@ -65,10 +66,9 @@ const BookingPage = () => {
 
   const calculateNights = () => {
     if (!form.check_in || !form.check_out) return 1;
-    const start = new Date(form.check_in);
-    const end = new Date(form.check_out);
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || start >= end) return 1;
-    return Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
+    const nights = calculateDateNights(form.check_in, form.check_out);
+    if (nights === null || nights < 1) return 1;
+    return nights;
   };
 
   const nights = calculateNights();
@@ -101,9 +101,7 @@ const BookingPage = () => {
     if (!form.check_in || !form.check_out) {
       return alert("Vui lòng chọn ngày nhận phòng và ngày trả phòng!");
     }
-    const start = new Date(form.check_in);
-    const end = new Date(form.check_out);
-    if (start >= end) {
+    if (form.check_in >= form.check_out) {
       return alert("Ngày nhận phòng phải trước ngày trả phòng!");
     }
 
@@ -266,7 +264,7 @@ const BookingPage = () => {
                     type="date"
                     name="check_in"
                     value={form.check_in}
-                    min={new Date().toISOString().split("T")[0]}
+                    min={getTodayDateOnly()}
                     onChange={handleChange}
                     className="w-full px-4 py-3 rounded-xl border border-indigo-100 bg-indigo-50/30 outline-none focus:ring-2 focus:ring-indigo-500 font-medium cursor-pointer"
                   />
@@ -279,7 +277,7 @@ const BookingPage = () => {
                     type="date"
                     name="check_out"
                     value={form.check_out}
-                    min={form.check_in || new Date().toISOString().split("T")[0]}
+                    min={form.check_in || getTodayDateOnly()}
                     onChange={handleChange}
                     className="w-full px-4 py-3 rounded-xl border border-rose-100 bg-rose-50/30 outline-none focus:ring-2 focus:ring-rose-500 font-medium cursor-pointer"
                   />

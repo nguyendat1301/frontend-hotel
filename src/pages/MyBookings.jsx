@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Home/HomeNavabar';
 import { useAuth } from '../hooks/useAuth';
 import { bookingService } from '../services/bookingService';
+import { formatDateOnly } from '../utils/dateOnly';
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -174,9 +175,9 @@ const MyBookings = () => {
                     )}
 
                     <div className="flex items-center text-sm text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                      <span className="flex-1 text-center font-medium">{new Date(booking.check_in_date).toLocaleDateString()}</span>
+                      <span className="flex-1 text-center font-medium">{formatDateOnly(booking.check_in_date)}</span>
                       <span className="px-3 text-amber-500 font-bold">→</span>
-                      <span className="flex-1 text-center font-medium">{new Date(booking.check_out_date).toLocaleDateString()}</span>
+                      <span className="flex-1 text-center font-medium">{formatDateOnly(booking.check_out_date)}</span>
                     </div>
 
                     <div className="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
