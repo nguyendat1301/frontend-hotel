@@ -64,7 +64,8 @@ const Navbar = () => {
         <div className="flex items-center gap-8">
           <div className="hidden md:flex items-center gap-6 text-[11px] uppercase tracking-[0.2em] font-semibold text-white/70">
             <Link to="/home" className={`hover:text-amber-400 transition ${location.pathname === '/home' ? 'text-amber-400' : ''}`}>Trang chủ</Link>
-            <Link to="/about" className="hover:text-amber-400 transition">Về chúng tôi</Link>
+            <Link to="/about" className={`hover:text-amber-400 transition ${location.pathname === '/about' ? 'text-amber-400' : ''}`}>Về chúng tôi</Link>
+            <Link to="/faq-policy" className={`hover:text-amber-400 transition ${location.pathname.startsWith('/faq') || location.pathname.startsWith('/policy') ? 'text-amber-400' : ''}`}>FAQ & Chính sách</Link>
           </div>
 
           {user ? (

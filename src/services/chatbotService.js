@@ -1,13 +1,18 @@
 import api from './api.jsx';
 
 /**
- * Gửi tin nhắn đến chatbot AI
- * @param {string} message - Nội dung tin nhắn
- * @param {Array} history - Lịch sử hội thoại [{role, parts:[{text}]}]
- * @returns {Promise<string>} Câu trả lời từ AI
+ * Gửi câu hỏi đến chatbot AI.
+ *
+ * @param {string} message    - Câu hỏi người dùng
+ * @param {Array}  history    - Lịch sử hội thoại [{role, parts:[{text}]}]
+ * @param {string} sessionId  - ID phiên (optional, dùng để đối chiếu response)
+ * @returns {Promise<{ answer: string, sources: Array, intent: string }>}
  */
-export async function sendChatMessage(message, history = []) {
-    const response = await api.post('/api/chatbot', { message, history });
-    return response.data.answer;
+export async function sendChatMessage(message, history = [], sessionId = null) {
+    const response = await api.post('/chatbot', {
+        message,
+        history,
+        sessionId,
+    });
+    return response.data;
 }
-

@@ -10,11 +10,15 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import Profile from "../pages/Profile";
 import About from "../pages/About";
+import FaqPolicy from "../pages/FaqPolicy";
 
 const publicRoutes = [
   { path: "/", element: <Home /> },
   { path: "/home", element: <Home /> },
   { path: "/about", element: <About /> },
+  { path: "/faq-policy", element: <FaqPolicy /> },
+  { path: "/faq", element: <FaqPolicy /> },
+  { path: "/policy", element: <FaqPolicy /> },
   { path: "/login", element: <Login /> },
   { path: "/booking", element: <BookingPage /> },
   { path: "/register", element: <Register /> },
