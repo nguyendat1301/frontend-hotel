@@ -26,6 +26,7 @@ const unauthenticatedEndpoints = new Set([
   '/reset-password',
   '/logout',
   '/profile',
+  '/chatbot',
 ]);
 
 const getRequestPath = (url = '') => {
